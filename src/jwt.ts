@@ -12,9 +12,9 @@ export function encode_jwt(
 ): string {
   const options: jwt.SignOptions = {
     expiresIn: ttl,
-    audience,
-    issuer,
   };
+  if (audience) options.audience = audience;
+  if (issuer) options.issuer = issuer;
   return jwt.sign({ id, ...payload }, secret, options);
 }
 
