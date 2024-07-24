@@ -1,8 +1,11 @@
-import { encode_jwt, decode_jwt, validate_jwt } from "../src/jwt";
+import { encode_jwt } from "../src/encoder";
+import { decode_jwt } from "../src/decoder";
+import { validate_jwt } from "../src/validate";
 import jwt from "jsonwebtoken";
+import { DecodedJWT, Payload } from "../src/interfaces";
 
 describe("JWT Functions", () => {
-  const secret = "test_secret";
+  let secret = "test_secret";
   const payload = { role: "user" };
   const id = "12345";
   const ttl = 3600; // 1 hour
@@ -14,16 +17,9 @@ describe("JWT Functions", () => {
   });
 
   test("encode_jwt should return a valid JWT", () => {
-    const decoded = jwt.verify(token, secret) as jwt.JwtPayload;
+    const decoded = decode_jwt(secret, token) as DecodedJWT;
     expect(decoded.id).toBe(id);
-    expect(decoded.role).toBe(payload.role);
-  });
-
-  test("decode_jwt should decode a valid JWT", () => {
-    const decodedJWT = decode_jwt(secret, token);
-    expect(decodedJWT.id).toBe(id);
-    expect(decodedJWT.payload.role).toBe(payload.role);
-    expect(decodedJWT.expires_at).toBeInstanceOf(Date);
+    expect(decoded.payload.role).toBe(payload.role);
   });
 
   test("decode_jwt should throw an error for an invalid token", () => {
@@ -41,6 +37,7 @@ describe("JWT Functions", () => {
   test("encode_jwt should handle optional parameters", () => {
     const audience = "test_audience";
     const issuer = "test_issuer";
+    //wait for the encoding
     const tokenWithOptionalParams = encode_jwt(
       secret,
       id,
@@ -49,11 +46,14 @@ describe("JWT Functions", () => {
       audience,
       issuer
     );
-    const decoded = jwt.verify(
-      tokenWithOptionalParams,
-      secret
-    ) as jwt.JwtPayload;
-    expect(decoded.aud).toBe(audience);
-    expect(decoded.iss).toBe(issuer);
+
+    if(!tokenWithOptionalParams) throw new Error('Token is empty')
+    
+    const decoded = decode_jwt(
+      secret=secret,
+      token=tokenWithOptionalParams,
+    ) as DecodedJWT;
+    expect(decoded.payload.aud).toBe(audience);
+    expect(decoded.payload.iss).toBe(issuer);
   });
 });

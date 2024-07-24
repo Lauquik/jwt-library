@@ -1,3 +1,4 @@
-// src/index.ts
-export { encode_jwt, decode_jwt, validate_jwt } from './jwt';
+export { encode_jwt } from './encoder'
+export {decode_jwt} from './decoder'
+export {validate_jwt} from './validate'
 export { Payload, DecodedJWT } from './interfaces';
